@@ -1,0 +1,12 @@
+{
+	"duration": 120,
+	"file-count": 3,
+	"line-length": 1000,
+	"multiline-percentage": 0,
+	"line-count": 1,
+	"file-path": "abc.log",
+	"input-source": "",
+	"lines-per-second": 2,
+	"rotate": true,
+	"max-size": 5
+}
