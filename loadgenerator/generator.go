@@ -24,7 +24,7 @@ func wrapUpTask(props *LoadGenProperties, totalLineCount int64) {
 		os.Exit(1)
 	}
 	log.Out = resultsLog
-	log.Info(props.Tags + " total_lines_generated=",totalLineCount)
+	log.Info(props.Tags+" total_lines_generated=", totalLineCount)
 	fmt.Printf("total_lines_generated=%v\n", totalLineCount)
 	props.Wg.Done()
 }
@@ -90,7 +90,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 
 	var fileLoopCount int64
 	for {
-		if props.ReplayCount != 0 &&  props.ReplayCount == fileLoopCount {
+		if props.ReplayCount != 0 && props.ReplayCount == fileLoopCount {
 			wrapUpTask(props, totalLineCount)
 			return
 		}
@@ -100,19 +100,20 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 		reader := bufio.NewReader(f)
 		for {
 			now := rateLimit.Take()
-			select {
-			case _ = <-timer:
-				wrapUpTask(props, totalLineCount)
-				return
-			default:
-				{
-					counter.Inc(1)
-					if props.EnableMetrics {
-						promCounter.Add(1)
-					}
 
+			if props.ReplayCount > 0 {
+				select {
+				case _ = <-timer:
+					wrapUpTask(props, totalLineCount)
+					return
+				default:
 				}
 			}
+			counter.Inc(1)
+			if props.EnableMetrics {
+				promCounter.Add(1)
+			}
+
 			prev := time.Now()
 			if !props.Rotate {
 				log.Out = fileArray[fileCountIndex]
@@ -215,8 +216,8 @@ func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenPrope
 	metrics.NewRegisteredFunctionalGauge("bytes-per-second", goGenMetricsRegistry, func() int64 {
 		value := props.LineLength * props.Lps
 		//export to prom
-		if props.EnableMetrics  {
-				promTotalBytesProcessedCounter.Add(float64(value))
+		if props.EnableMetrics {
+			promTotalBytesProcessedCounter.Add(float64(value))
 		}
 		return value
 	})
