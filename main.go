@@ -10,5 +10,3 @@ func main() {
 	props := new(loadgen.LoadGenProperties)
 	cli.Run(props)
 }
-
-
