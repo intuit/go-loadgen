@@ -1,4 +1,4 @@
-module github.intuit.com/cbhatt1/go-loadgen
+module github.com/intuit/go-loadgen
 
 go 1.13
 
