@@ -12,4 +12,4 @@ const DefaultLinesPerSecond = 1000   // 1 Lps
 const DefaultMultiLinePercentage = 0 //0%
 const DefaultMultiLineCount = 1      //1 line
 const DefaultMaxFileRotationSize = 500
-const TestOutputFileRootPath = "/var/log"
+const TestOutputFileRootPath = "/tmp"

@@ -22,6 +22,7 @@ func setupProps(props *LoadGenProperties) {
 	if props.Lps == 0 {
 		props.Lps = 10
 	}
+	props.ResultLog = fileRootPath + "/" + "result.log"
 
 	if props.Duration == 0 {
 		props.Duration = 2
@@ -126,7 +127,7 @@ func TestGenerateRandomAlphaNumericLoad_multiLine(t *testing.T) {
 	props := new(LoadGenProperties)
 	props.MultiLinePercent = 100 //100% of lines are multi-lines in nature.
 	props.NumOfLinesInMultiLineLog = 2
-	outputFilePath := fileRootPath + "/" +uuid.New().String()[:5] + ".log"
+	outputFilePath := uuid.New().String()[:5] + ".log"
 	props.FilePath = outputFilePath
 	setupProps(props)
 	GenerateAlphaNumeric(nil, props)
@@ -134,7 +135,7 @@ func TestGenerateRandomAlphaNumericLoad_multiLine(t *testing.T) {
 	totalNewLineCharacters := props.Duration * props.Lps * int64(props.NumOfLinesInMultiLineLog)
 	expectedTotalBytesInFile := props.Duration*props.Lps*int64(props.NumOfLinesInMultiLineLog)*props.LineLength + totalNewLineCharacters
 
-	defer os.Remove(outputFilePath)
+	//defer os.Remove(outputFilePath)
 	fmt.Println("Output path = " + outputFilePath)
 	result, actualSize := hasExpectedLengthOfBytes(expectedTotalBytesInFile, outputFilePath)
 	if !result {

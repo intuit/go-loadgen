@@ -43,7 +43,7 @@ func TestMultiLineBuilder(t *testing.T) {
 func TestFileRefs(t *testing.T) {
 	var limit int = 10
 	loadGen := new(LoadGenProperties)
-	loadGen.FilePath = "/var/log/xtest.log"
+	loadGen.FilePath = "xtest.log"
 	loadGen.FileCount = int64(limit)
 	files, err := loadGen.fileRef()
 	defer tearDownTestFiles(files)
