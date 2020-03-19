@@ -6,9 +6,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
-	"github.intuit.com/cbhatt1/go-loadgen/constants"
-	loadgen "github.intuit.com/cbhatt1/go-loadgen/loadgenerator"
-	"github.intuit.com/cbhatt1/go-loadgen/metrics"
+	"github.com/intuit/go-loadgen/constants"
+	loadgen "github.com/intuit/go-loadgen/loadgenerator"
+	"github.com/intuit/go-loadgen/metrics"
 	"os"
 	"sync"
 )

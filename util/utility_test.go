@@ -3,8 +3,8 @@ package utility
 import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.intuit.com/cbhatt1/go-loadgen/constants"
-	"github.intuit.com/cbhatt1/go-loadgen/eventbreaker"
+	"github.com/intuit/go-loadgen/constants"
+	"github.com/intuit/go-loadgen/eventbreaker"
 	"io/ioutil"
 	"os"
 	"strings"

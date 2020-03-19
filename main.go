@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.intuit.com/cbhatt1/go-loadgen/cli"
-	loadgen "github.intuit.com/cbhatt1/go-loadgen/loadgenerator"
+	"github.com/intuit/go-loadgen/cli"
+	loadgen "github.com/intuit/go-loadgen/loadgenerator"
 )
 
 func main() {
@@ -10,5 +10,3 @@ func main() {
 	props := new(loadgen.LoadGenProperties)
 	cli.Run(props)
 }
-
-
