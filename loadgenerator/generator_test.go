@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
-	"github.intuit.com/cbhatt1/go-loadgen/constants"
+	"github.com/intuit/go-loadgen/constants"
 	"os"
 	"path/filepath"
 	"sync"
