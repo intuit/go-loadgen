@@ -15,8 +15,8 @@ func TestBuildLineMethod(t *testing.T) {
 	}
 }
 
-func tearDownTestFiles(fileArray []*os.File){
-	for _,v := range fileArray {
+func tearDownTestFiles(fileArray []*os.File) {
+	for _, v := range fileArray {
 		_ = os.Remove(v.Name())
 	}
 }
@@ -29,13 +29,13 @@ func TestMultiLineBuilder(t *testing.T) {
 	expectedNumberOfLines := loadGen.NumOfLinesInMultiLineLog
 	expectedNumberOfBytes := (int(loadGen.LineLength) * loadGen.NumOfLinesInMultiLineLog) + (loadGen.NumOfLinesInMultiLineLog - 1)
 
-	outputLine  := loadGen.buildMultiLine()
+	outputLine := loadGen.buildMultiLine()
 	if len(outputLine) != expectedNumberOfBytes {
 		t.Errorf("Multiline does not have the expected number of bytes. actual = %d, expected %d", len(outputLine), expectedNumberOfBytes)
 	}
 	lines := strings.Split(outputLine, "\n")
 	if len(lines) != expectedNumberOfLines {
-		t.Errorf("Multiline does not contain the expected number of new lines. actual = %d, expected %d", len(lines),  expectedNumberOfLines)
+		t.Errorf("Multiline does not contain the expected number of new lines. actual = %d, expected %d", len(lines), expectedNumberOfLines)
 	}
 
 }
@@ -48,15 +48,13 @@ func TestFileRefs(t *testing.T) {
 	files, err := loadGen.fileRef()
 	defer tearDownTestFiles(files)
 
-	if err != nil  {
-		t.Errorf("fileRef() method output is invalid %s",err)
+	if err != nil {
+		t.Errorf("fileRef() method output is invalid %s", err)
 	}
 	if files == nil {
-		t.Errorf("fileRef() output is nil, expected %d",limit)
+		t.Errorf("fileRef() output is nil, expected %d", limit)
 	}
 	if len(files) != limit {
-		t.Errorf("length of file array returned by fileRef() has a mismatch, contains %d, expected %d",len(files), limit)
+		t.Errorf("length of file array returned by fileRef() has a mismatch, contains %d, expected %d", len(files), limit)
 	}
 }
-
-
