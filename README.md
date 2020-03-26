@@ -1,3 +1,6 @@
+# CI badge:
+[![<ORG_NAME>](https://circleci.com/github/intuit/go-loadgen.svg?style=svg)](<LINK>)
+
 ## go-loadgen
 ![logo](logo.png)
 
