@@ -1,4 +1,3 @@
-# CI badge:
 [![intuit](https://circleci.com/gh/intuit/go-loadgen.svg?style=svg)](<LINK>)
 [![License: Apache2.0](https://img.shields.io/badge/License-Apache2.0-blue.svg)](https://opensource.org/licenses/Apache2.0)
 [![Go version](https://img.shields.io/github/go-mod/go-version/intuit/go-loadgen)](https://img.shields.io/github/go-mod/go-version/intuit/go-loadgen)
