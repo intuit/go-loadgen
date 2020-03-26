@@ -3,12 +3,12 @@ package loadgen
 import (
 	"bufio"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/rcrowley/go-metrics"
-	"github.com/sirupsen/logrus"
 	"github.com/intuit/go-loadgen/eventbreaker"
 	metricsUtility "github.com/intuit/go-loadgen/metrics"
 	utility "github.com/intuit/go-loadgen/util"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/rcrowley/go-metrics"
+	"github.com/sirupsen/logrus"
 	"go.uber.org/ratelimit"
 	"io"
 	"os"
@@ -30,7 +30,7 @@ func wrapUpTask(props *LoadGenProperties, totalLineCount int64) {
 }
 
 /**
-Replays an input sample file from the top of the head and adheres to the specified format, line rate and duration.
+GenerateLoadFromInputFile replays an input sample file from the top of the head and adheres to the specified format, line rate and duration.
 */
 func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGenProperties) {
 	fmt.Println("Generating logs by replaying input file...")
@@ -166,7 +166,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 }
 
 /**
-Generates random alphanumeric strings and writes it to a specified file at specified line rate(lps) and for specified duration.
+GenerateAlphaNumeric generates random alphanumeric strings and writes it to a specified file at specified line rate(lps) and for specified duration.
 */
 func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenProperties) {
 	fmt.Print("Generating random alphanumeric characters...")

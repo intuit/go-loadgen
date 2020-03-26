@@ -3,10 +3,11 @@ package eventbreaker
 import "regexp"
 
 type KnownEventBreakers struct {
-regexExp []regexp.Regexp
+	regexExp []regexp.Regexp
 }
+
 /*
-	Initializes a known set of log event breakers. (Note: Usually dates and ip addresses are commonly used as event breakers.)
+	NewEventBreakers Initializes a known set of log event breakers. (Note: Usually dates and ip addresses are commonly used as event breakers.)
 */
 func NewEventBreakers() *KnownEventBreakers {
 	eventBreakers := new(KnownEventBreakers)

@@ -3,8 +3,8 @@ package loadgen
 import (
 	"fmt"
 	"github.com/google/uuid"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"github.com/intuit/go-loadgen/constants"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"os"
 	"path/filepath"
 	"sync"
@@ -30,8 +30,8 @@ func setupProps(props *LoadGenProperties) {
 	props.EnableMetrics = false
 
 	props.FileCount = 1
-	if props.LogFormat == nil{
-			props.LogFormat = &easy.Formatter{
+	if props.LogFormat == nil {
+		props.LogFormat = &easy.Formatter{
 			LogFormat:       "%msg%\n",
 			TimestampFormat: "2006-01-02T15:04:05.999-07:00",
 		}
@@ -50,10 +50,10 @@ func TestGenerateRandomAlphaNumeric_singleLine(t *testing.T) {
 	outputFilePath := fileRootPath + "/" + uuid.New().String()[:5] + ".log"
 	props.FilePath = outputFilePath
 	setupProps(props)
-	GenerateAlphaNumeric(nil,props)
+	GenerateAlphaNumeric(nil, props)
 	totalNewLineCharacters := props.Duration * props.Lps
-	expectedTotalBytesInFile := (props.Duration*props.Lps*props.LineLength) + totalNewLineCharacters
-	expectedTotalBytesInFileWithErrorMargin := (props.Duration*props.Lps*props.LineLength) + (totalNewLineCharacters + props.LineLength + 1)
+	expectedTotalBytesInFile := (props.Duration * props.Lps * props.LineLength) + totalNewLineCharacters
+	expectedTotalBytesInFileWithErrorMargin := (props.Duration * props.Lps * props.LineLength) + (totalNewLineCharacters + props.LineLength + 1)
 
 	defer os.Remove(outputFilePath)
 	fmt.Println("Output path = " + outputFilePath)
@@ -76,10 +76,10 @@ func TestGenerateRandomAlphaNumeric_multiLinePercent(t *testing.T) {
 	props.Duration = 4
 	//props.LogFormat = utility.GetFormatter(true)
 	setupProps(props)
-	GenerateAlphaNumeric(nil,props)
-	totalNewLineCharacters := (props.Duration * props.Lps)/2 + (props.Duration * props.Lps * int64(props.NumOfLinesInMultiLineLog))/2
-	expectedTotalBytesInFile := (props.Duration * props.Lps * props.LineLength)/2 +
-		(props.Duration * props.Lps * props.LineLength * int64(props.NumOfLinesInMultiLineLog))/2 +
+	GenerateAlphaNumeric(nil, props)
+	totalNewLineCharacters := (props.Duration*props.Lps)/2 + (props.Duration*props.Lps*int64(props.NumOfLinesInMultiLineLog))/2
+	expectedTotalBytesInFile := (props.Duration*props.Lps*props.LineLength)/2 +
+		(props.Duration*props.Lps*props.LineLength*int64(props.NumOfLinesInMultiLineLog))/2 +
 		totalNewLineCharacters
 
 	defer os.Remove(outputFilePath)
@@ -89,7 +89,6 @@ func TestGenerateRandomAlphaNumeric_multiLinePercent(t *testing.T) {
 		t.Errorf("The generated output file does not contain expected length of bytes. expected = %d, actual = %d", expectedTotalBytesInFile, actualSize)
 	}
 }
-
 
 func deleteFile(files []string) {
 	//cleanup any existing files before staring this test
@@ -109,17 +108,17 @@ func TestGenerateRandomAlphaNumeric_rotation(t *testing.T) {
 	props.LineLength = 1000000 //1MB
 	props.Duration = 3         //in seconds
 	props.Lps = 1              //in seconds
-	props.FilePath = fileRootPath+ "/" + uuid.New().String()[:5]
+	props.FilePath = fileRootPath + "/" + uuid.New().String()[:5]
 
 	setupProps(props)
 	GenerateAlphaNumeric(nil, props)
 
-	files, _ := filepath.Glob(props.FilePath+ "*")
+	files, _ := filepath.Glob(props.FilePath + "*")
 	defer deleteFile(files)
 	expectedNumOfRotatedFiles := props.Duration * props.Lps
 
 	if len(files) != int(expectedNumOfRotatedFiles) {
- 		t.Errorf("Log rotation validation tests failed because expected number of rotated files = %d, actual = %d", expectedNumOfRotatedFiles, len(files))
+		t.Errorf("Log rotation validation tests failed because expected number of rotated files = %d, actual = %d", expectedNumOfRotatedFiles, len(files))
 	}
 }
 
