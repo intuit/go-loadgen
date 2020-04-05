@@ -8,7 +8,7 @@
 
 go-loadgen is a log load generator tool meant for testing the logging infrastructure. It is capable of producing structured or unstructured/structure logs with random alphanumeric strings and can also playback any input file at a specified controlled rate. 
 ## Build
-This program requires GO 1.7. 
+This program requires GO 1.13 
 
 `go build -o loadgen main.go`
 
