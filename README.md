@@ -12,13 +12,13 @@ This program requires GO 1.13
 ```
 go get github.com/intuit/go-loadgen
 cd $GOPATH/src/bin/github.com/go-loadgen
-go build -o go-loadgen
+go build -o loadgen
 ```
 
 ## Usage
 Use the help command to find all available commands and flags. 
 
-    HHNLWB76D9289E:go-loadgen cbhatt1$ ./go-loadgen --help
+    HHNLWB76D9289E:go-loadgen cbhatt1$ ./loadgen --help
     loadgen is a tool which generates test-data (synthetic/replay) at a controlled rate to test logging infrastructure.
 
     Usage:
