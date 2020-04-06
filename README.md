@@ -15,9 +15,6 @@ cd $GOPATH/src/bin/github.com/go-loadgen
 go build -o go-loadgen
 ```
 
-If you prefer to use vendor, then you can use the below command
-`go build -v -o go-loadgen main.go`
-
 ## Usage
 Use the help command to find all available commands and flags. 
 
