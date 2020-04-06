@@ -9,9 +9,11 @@
 go-loadgen is a log load generator tool meant for testing the logging infrastructure. It is capable of producing structured or unstructured/structure logs with random alphanumeric strings and can also playback any input file at a specified controlled rate. 
 ## Build
 This program requires GO 1.13 
-```go get github.com/intuit/go-loadgen
+```
+go get github.com/intuit/go-loadgen
 cd $GOPATH/src/bin/github.com/go-loadgen
-go build -o go-loadgen```
+go build -o go-loadgen
+```
 
 If you prefer to use vendor, then you can use the below command
 `go build -v -o go-loadgen main.go`
