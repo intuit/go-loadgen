@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/intuit/go-loadgen/constants"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
+	"math"
 	"os"
 	"path/filepath"
 	"sync"
@@ -30,12 +30,9 @@ func setupProps(props *LoadGenProperties) {
 	props.EnableMetrics = false
 
 	props.FileCount = 1
-	if props.LogFormat == nil {
-		props.LogFormat = &easy.Formatter{
-			LogFormat:       "%msg%\n",
-			TimestampFormat: "2006-01-02T15:04:05.999-07:00",
-		}
-	}
+
+	props.DisableTimestamp = true
+
 	props.Wg = &wg
 
 	if !props.Rotate {
@@ -74,7 +71,7 @@ func TestGenerateRandomAlphaNumeric_multiLinePercent(t *testing.T) {
 	props.FilePath = outputFilePath
 	props.Lps = 1
 	props.Duration = 4
-	//props.LogFormat = utility.GetFormatter(true)
+	//props.LogFormat = utility.GetFormatter(true, constants.DisableTimestamp)
 	setupProps(props)
 	GenerateAlphaNumeric(nil, props)
 	totalNewLineCharacters := (props.Duration*props.Lps)/2 + (props.Duration*props.Lps*int64(props.NumOfLinesInMultiLineLog))/2
@@ -124,17 +121,19 @@ func TestGenerateRandomAlphaNumeric_rotation(t *testing.T) {
 
 func TestGenerateRandomAlphaNumericLoad_multiLine(t *testing.T) {
 	props := new(LoadGenProperties)
+	props.DisableTimestamp = true
 	props.MultiLinePercent = 100 //100% of lines are multi-lines in nature.
 	props.NumOfLinesInMultiLineLog = 2
 	outputFilePath := uuid.New().String()[:5] + ".log"
 	props.FilePath = outputFilePath
 	setupProps(props)
+	fmt.Printf("%+v", props)
 	GenerateAlphaNumeric(nil, props)
 
 	totalNewLineCharacters := props.Duration * props.Lps * int64(props.NumOfLinesInMultiLineLog)
 	expectedTotalBytesInFile := props.Duration*props.Lps*int64(props.NumOfLinesInMultiLineLog)*props.LineLength + totalNewLineCharacters
 
-	//defer os.Remove(outputFilePath)
+	defer os.Remove(outputFilePath)
 	fmt.Println("Output path = " + outputFilePath)
 	result, actualSize := hasExpectedLengthOfBytes(expectedTotalBytesInFile, outputFilePath)
 	if !result {
@@ -148,8 +147,20 @@ func hasExpectedLengthOfBytes(expectedTotalBytesInFile int64, output string) (bo
 	if err != nil {
 		return false, info.Size()
 	}
-	if info.Size() != expectedTotalBytesInFile {
-		return false, info.Size()
+	if approximatelyEqual(expectedTotalBytesInFile, info.Size()) {
+		return true, info.Size()
 	}
-	return true, info.Size()
+	return false, info.Size()
+}
+
+func approximatelyEqual(expected, actual int64) bool {
+	errorMargin := 0.05 // 5% error is tolerable
+	fivePercentOfExpected := float64(expected) * errorMargin
+	diff := math.Abs(float64(expected - actual))
+	fmt.Println(fivePercentOfExpected)
+	fmt.Println(diff)
+	if diff <= fivePercentOfExpected {
+		return true
+	}
+	return false
 }

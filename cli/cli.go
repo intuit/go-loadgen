@@ -8,7 +8,6 @@ import (
 	"github.com/intuit/go-loadgen/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"os"
 	"sync"
 )
@@ -26,6 +25,8 @@ const (
 	metricsServerPort           = "metrics-server-port"
 	inputFilePath               = "input-file-path"
 	replayCount                 = "replay-count"
+	disableTimestamp            = "disable-timestamp"
+	customTimestampFormat       = "custom-timestamp-format"
 	output                      = "output"
 	config                      = "config"
 	tags                        = "tags"
@@ -54,6 +55,8 @@ func printInput(props *loadgen.LoadGenProperties) {
 	fmt.Printf(linesPerSecond+" = %d\n", props.Lps)
 	fmt.Println(output + " =  %s" + props.FilePath)
 	fmt.Printf(multiLinePercent+" = %d\n", props.MultiLinePercent)
+	fmt.Printf(disableTimestamp+" = %t\n", props.DisableTimestamp)
+	fmt.Printf(customTimestampFormat+" = %s\n", props.CustomTimestampFormat)
 	fmt.Printf(enableRotate+" = %t\n", props.Rotate)
 	fmt.Printf(logRotationMaxSizeMegabytes+" = %d\n", props.RotateSizeMB)
 }
@@ -114,7 +117,6 @@ func Run(props *loadgen.LoadGenProperties) {
 			if props.EnableMetrics {
 				go metrics.StartMetricsServer(promRegistry, &metricsServerPortStr)
 			}
-			setupFormatterWithTags(props, cmd)
 			go loadgen.GenerateLoadFromInputFile(promRegistry, props)
 			printInput(props)
 			wg.Wait()
@@ -136,8 +138,6 @@ func Run(props *loadgen.LoadGenProperties) {
 			if props.EnableMetrics {
 				go metrics.StartMetricsServer(promRegistry, &metricsServerPortStr)
 			}
-
-			setupFormatterWithTags(props, cmd)
 			go loadgen.GenerateAlphaNumeric(promRegistry, props)
 			wg.Wait()
 		},
@@ -156,6 +156,7 @@ func Run(props *loadgen.LoadGenProperties) {
 	rootCmd.PersistentFlags().Int64VarP(&props.RotateSizeMB, logRotationMaxSizeMegabytes, "", constants.DefaultMaxFileSize, "Rotate after N MegaBytes. example 100. ")
 	rootCmd.PersistentFlags().StringVar(&props.Tags, tags, "t", "Custom hardcoded tags in the form of K=V")
 	rootCmd.PersistentFlags().StringVar(&props.ResultLog, resultLog, "", "Path of the results log where metrics such as total_lines_generated will be log.")
+	rootCmd.PersistentFlags().StringVar(&props.CustomTimestampFormat, customTimestampFormat, "", "Optional custom timestamp format.The default format is 2006-01-02T15:04:05.000-07:00")
 
 	rootCmd.MarkPersistentFlagRequired(output)
 	rootCmd.MarkPersistentFlagRequired(linesPerSecond)
@@ -165,6 +166,9 @@ func Run(props *loadgen.LoadGenProperties) {
 	replayFileCmd.MarkFlagRequired(inputFilePath)
 
 	replayFileCmd.Flags().Int64VarP(&props.ReplayCount, replayCount, "", 0, "max number of replays. default is infinite, the replay stops when test duration expires.")
+	rootCmd.PersistentFlags().BoolVarP(&props.DisableTimestamp, disableTimestamp, "x", false, "use --disable-timestamp false will disable timestamp injection while replaying logs. "+
+		"When this flag is not used. Do not modify this parameter for auto-generated random alphanumberic logs."+
+		"Disabling timestamps is typically suitable while replaying a log-file with pre-existing timestamps.")
 
 	//Defining local flags for random string generator command
 	randomStringsCmd.Flags().IntVarP(&props.MultiLinePercent, multiLinePercent, "m", constants.DefaultMultiLinePercentage, " % of log entries which have multiple lines, example: 1% will generate ")
@@ -181,15 +185,5 @@ func Run(props *loadgen.LoadGenProperties) {
 	if err != nil {
 		error.Error(err)
 		os.Exit(1)
-	}
-}
-
-func setupFormatterWithTags(props *loadgen.LoadGenProperties, cmd *cobra.Command) {
-	flagSet := cmd.Flags()
-	if flagSet.Changed(tags) {
-		props.LogFormat = &easy.Formatter{
-			LogFormat:       "%time% " + props.Tags + " %msg%\n",
-			TimestampFormat: "2006-01-02T15:04:05.099-07:00",
-		}
 	}
 }

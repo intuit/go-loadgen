@@ -3,10 +3,10 @@ package loadgen
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sirupsen/logrus"
-	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"github.com/intuit/go-loadgen/constants"
 	utility "github.com/intuit/go-loadgen/util"
+	"github.com/sirupsen/logrus"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"io/ioutil"
 	"math/rand"
@@ -26,6 +26,8 @@ type LoadGenProperties struct {
 	FilePath                 string          `json:"file-path"`
 	InputSourceFile          string          `json:"input-source-file"`
 	ReplayCount              int64           `json:"replay-count"`
+	CustomTimestampFormat    string          `json:"custom-timestamp-format"`
+	DisableTimestamp         bool            `json:"disable-timestamp"`
 	Lps                      int64           `json:"lines-per-second"`
 	Rotate                   bool            `json:"rotate"`
 	RotateSizeMB             int64           `json:"rotation-max-file-size-megabytes"`
@@ -67,7 +69,8 @@ func (props *LoadGenProperties) fetchLogHandlers(isLineEndsWithNewLine bool) []*
 	for n := 0; n < int(props.FileCount); n++ {
 		logHandlers[n] = logrus.New()
 		if props.LogFormat == nil {
-			logHandlers[n].SetFormatter(utility.GetFormatter(isLineEndsWithNewLine))
+			logProps := SetupLogProps(false, props)
+			logHandlers[n].SetFormatter(utility.GetFormatter(logProps))
 		} else {
 			logHandlers[n].SetFormatter(props.LogFormat)
 		}
@@ -83,9 +86,9 @@ func (props *LoadGenProperties) fileRef() ([]*os.File, error) {
 
 	// if output path is declared as stdout then return reference to stdout and skip rest
 	if props.FilePath != "" {
-		if strings.ToLower(props.FilePath) == "stdout"{
+		if strings.ToLower(props.FilePath) == "stdout" {
 			fileArray[0] = os.Stdout
-			return fileArray ,nil
+			return fileArray, nil
 		}
 	}
 	var err error = nil
@@ -122,7 +125,7 @@ func (props *LoadGenProperties) buildLine() string {
 func (props *LoadGenProperties) setupLogRotation(filePath string, logHandlers []*logrus.Logger) {
 
 	for i := 0; i < len(logHandlers); i++ {
-		var maxFileSize int = 0;
+		var maxFileSize int = 0
 		if props.RotateSizeMB == 0 {
 			maxFileSize = constants.DefaultMaxFileRotationSize
 		} else {
@@ -164,4 +167,22 @@ func (props *LoadGenProperties) buildMultiLine() string {
 		totalLineLength += 1
 	}
 	return string(multiLineString)
+}
+
+func SetupLogProps(isMetricsLogs bool, props *LoadGenProperties) *utility.LogProperties {
+	logProps := new(utility.LogProperties)
+
+	if isMetricsLogs {
+		logProps.DisableTimestamp = false
+		logProps.CustomTimestampFormat = ""
+		logProps.Tags = ""
+		logProps.IsLineEndsWithNewLine = true
+	} else {
+		logProps.DisableTimestamp = props.DisableTimestamp
+		logProps.CustomTimestampFormat = props.CustomTimestampFormat
+		logProps.Tags = props.Tags
+		logProps.IsLineEndsWithNewLine = true
+	}
+
+	return logProps
 }

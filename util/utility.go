@@ -1,18 +1,45 @@
 package utility
 
-import easy "github.com/t-tomalak/logrus-easy-formatter"
+import (
+	"github.com/intuit/go-loadgen/constants"
+	easy "github.com/t-tomalak/logrus-easy-formatter"
+)
 
-func GetFormatter(isLineEndsWithNewLine bool) *easy.Formatter {
+type LogProperties struct {
+	IsLineEndsWithNewLine bool
+	CustomTimestampFormat string
+	DisableTimestamp      bool
+	Tags                  string
+	LogFormat             *easy.Formatter
+}
+
+func GetFormatter(logProps *LogProperties) *easy.Formatter {
 	var format string
 
-	if isLineEndsWithNewLine {
-		format = "%time% %msg%\n"
+	if !logProps.DisableTimestamp {
+		format += "%time%" + " "
+	}
+
+	if logProps.Tags != "" {
+		format += logProps.Tags + " "
+	}
+
+	if logProps.IsLineEndsWithNewLine {
+		format += "%msg%\n"
 	} else {
-		format = "%time% %msg%"
+		format += "%msg%"
+	}
+
+	var timestampFormat = ""
+	if logProps.CustomTimestampFormat != "" {
+		timestampFormat = logProps.CustomTimestampFormat
+	} else {
+		timestampFormat = constants.DefaultLogTimestampFormat
+
 	}
 	var logFormat = &easy.Formatter{
 		LogFormat:       format,
-		TimestampFormat: "2006-01-02T15:04:05.000-07:00",
+		TimestampFormat: timestampFormat,
 	}
 	return logFormat
 }

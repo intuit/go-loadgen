@@ -18,21 +18,36 @@ import (
 
 func wrapUpTask(props *LoadGenProperties, totalLineCount int64) {
 	var log = logrus.New()
-	resultsLog, err := os.OpenFile(props.ResultLog, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(1)
+	if props.ResultLog == "" {
+		fmt.Printf("ResultLog file was not specified for this test. ResutLog file helps summarize the outcome of the test. " +
+			"It is a recommended paramter.")
+	} else {
+		resultsLog, err := os.OpenFile(props.ResultLog, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			fmt.Print(err)
+			os.Exit(1)
+		}
+		log.Out = resultsLog
+		log.Info(props.Tags+" total_lines_generated=", totalLineCount)
+		resultsLog.Close()
 	}
-	log.Out = resultsLog
-	log.Info(props.Tags+" total_lines_generated=", totalLineCount)
-	fmt.Printf("total_lines_generated=%v\n", totalLineCount)
+
+	fmt.Printf("\n\n total_lines_generated=%v\n\n ", totalLineCount)
 	props.Wg.Done()
 }
 
-/**
+/*
+*
 GenerateLoadFromInputFile replays an input sample file from the top of the head and adheres to the specified format, line rate and duration.
 */
 func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGenProperties) {
+
+	if props.ReplayCount == 0 && props.durationInSeconds() == 0 {
+		fmt.Print("Error! Stopping the test. \n" +
+			" Test termination factor is missing! Either specify `--duration` or `replay-count`")
+		os.Exit(1)
+	}
+
 	fmt.Println("Generating logs by replaying input file...")
 	const MultiLineLimit = 1000
 
@@ -58,6 +73,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 	rateLimit := ratelimit.New(int(props.Lps))
 	timer := time.After(props.durationInSeconds())
 	numberOfFiles := int(props.FileCount)
+
 	var multiLineString strings.Builder
 
 	eventBreakers := eventbreaker.NewEventBreakers()
@@ -69,7 +85,9 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 	goGenMetricsRegistry.Register("total-events-processed", counter)
 	metricsLogger := logrus.New()
 	metricsLogger.Out = os.Stdout
-	metricsLogger.Formatter = utility.GetFormatter(false)
+	logProps := SetupLogProps(false, props)
+	metricsLogger.Formatter = utility.GetFormatter(logProps)
+
 	go metrics.Log(goGenMetricsRegistry, 1*time.Second, metricsLogger)
 
 	//prometheus stuff
@@ -101,7 +119,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 		for {
 			now := rateLimit.Take()
 
-			if props.ReplayCount > 0 {
+			if props.durationInSeconds() > 0 {
 				select {
 				case _ = <-timer:
 					wrapUpTask(props, totalLineCount)
@@ -117,7 +135,8 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 			prev := time.Now()
 			if !props.Rotate {
 				log.Out = fileArray[fileCountIndex]
-				log.SetFormatter(utility.GetFormatter(false))
+				logProps := SetupLogProps(false, props)
+				log.SetFormatter(utility.GetFormatter(logProps))
 			} else {
 				log = logHandlers[fileCountIndex]
 			}
@@ -165,7 +184,8 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 	f.Close()
 }
 
-/**
+/*
+*
 GenerateAlphaNumeric generates random alphanumeric strings and writes it to a specified file at specified line rate(lps) and for specified duration.
 */
 func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenProperties) {
@@ -201,7 +221,7 @@ func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenPrope
 	goGenMetricsRegistry.Register("total_events_processed", counter)
 	metricsLogger := logrus.New()
 	metricsLogger.Out = os.Stdout
-	metricsLogger.Formatter = utility.GetFormatter(true)
+
 	go metrics.Log(goGenMetricsRegistry, 1*time.Second, metricsLogger)
 
 	//prometheus stuff
@@ -239,11 +259,8 @@ func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenPrope
 		}
 		if !props.Rotate {
 			log.Out = fileArray[fileCountIndex]
-			if props.LogFormat == nil {
-				log.SetFormatter(utility.GetFormatter(true))
-			} else {
-				log.SetFormatter(props.LogFormat)
-			}
+			logProps := SetupLogProps(false, props)
+			log.SetFormatter(utility.GetFormatter(logProps))
 		} else {
 			log = logHandlers[fileCountIndex]
 		}
@@ -264,4 +281,5 @@ func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenPrope
 		prev = now
 		totalLineCount++
 	}
+
 }
