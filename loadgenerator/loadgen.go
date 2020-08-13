@@ -80,6 +80,14 @@ func (props *LoadGenProperties) fetchLogHandlers(isLineEndsWithNewLine bool) []*
  */
 func (props *LoadGenProperties) fileRef() ([]*os.File, error) {
 	var fileArray = make([]*os.File, props.FileCount, props.FileCount)
+
+	// if output path is declared as stdout then return reference to stdout and skip rest
+	if props.FilePath != "" {
+		if strings.ToLower(props.FilePath) == "stdout"{
+			fileArray[0] = os.Stdout
+			return fileArray ,nil
+		}
+	}
 	var err error = nil
 	for n := 0; n < int(props.FileCount); n++ {
 		fileVar := props.FilePath
