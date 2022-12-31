@@ -11,11 +11,15 @@ go-loadgen is a log load generator tool meant for testing the logging infrastruc
 ## Build
 This program requires GO 1.19 
 ```
-go get github.com/intuit/go-loadgen
-cd $GOPATH/src/bin/github.com/go-loadgen
-go build -o loadgen
+go install github.com/intuit/go-loadgen@latest
+ln -s /root/go/bin/go-loadgen /usr/bin/loadgen
 ```
 
+### developers
+```
+//Build command 
+go build -o loadgen
+```
 ## Usage
 Use the help command to find all available commands and flags. 
 
