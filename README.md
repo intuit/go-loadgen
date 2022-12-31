@@ -12,7 +12,7 @@ go-loadgen is a log load generator tool meant for testing the logging infrastruc
 This program requires GO 1.19 
 ```
 go install github.com/intuit/go-loadgen@latest
-ln -s /root/go/bin/go-loadgen /usr/bin/loadgen
+ln -s $GOPATH/bin/go-loadgen /usr/bin/loadgen
 ```
 
 ### developers
