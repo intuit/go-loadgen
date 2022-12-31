@@ -9,7 +9,7 @@
 
 go-loadgen is a log load generator tool meant for testing the logging infrastructure. It is capable of producing structured or unstructured/structure logs with random alphanumeric strings and can also playback any input file at a specified controlled rate. 
 ## Build
-This program requires GO 1.13 
+This program requires GO 1.19 
 ```
 go get github.com/intuit/go-loadgen
 cd $GOPATH/src/bin/github.com/go-loadgen
@@ -33,7 +33,9 @@ Use the help command to find all available commands and flags.
 
     Flags:
           --config string                         -config /path/to/source/jsonfile (default "cfg")
-      -d, --duration int                          Duration of the job in seconds (default 300)
+          --custom-timestamp-format string        Optional custom timestamp format.The default format is 2006-01-02T15:04:05.000-07:00
+      -x, --disable-timestamp                     use --disable-timestamp false will disable timestamp injection while replaying logs. When this flag is not used. Do not modify this parameter for auto-generated random alphanumberic logs.Disabling timestamps is typically suitable while replaying a log-file with pre-existing timestamps.
+      -d, --duration int                          Duration of the job in seconds
           --enable-config                         use config file for configuration (default false)
       -r, --enable-log-rotation                   by default log rotation is off, use this flag to turn it on. Example --enable-log-rotation will turn log rotation on
           --enable-metrics                        true, enables prometheus metrics on http://<localhost>:<port>/metric HTTP endpoint for line emit rates and byte count. default is off.
@@ -174,6 +176,16 @@ Log rotation default settings
 | File Compression |  Disabled| |
 
 
+## Common options
+
+- Customizing log timestamp 
+Use `2006-01-02T15:04:05.000-07:00` with the --custom-timestamp-format flag to provide custom timestamp format. 
+Example:
+
+```
+./loadgen ... --custom-timestamp-format 2006/01/02T15-04-05 ...
+```
+The above custom timestamp will override the default timestamp in both alphanumeric random logs and replay logs depending on which mode the test is executed.
 
 ## Prometheus Metrics
 
