@@ -1,6 +1,7 @@
 package loadgen
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -25,9 +26,10 @@ func TestMultiLineBuilder(t *testing.T) {
 	loadGen := new(LoadGenProperties)
 	var limit int = 10
 	loadGen.LineLength = int64(limit)
-	loadGen.NumOfLinesInMultiLineLog = 10
+	loadGen.NumOfLinesInMultiLineLog = 1
 	expectedNumberOfLines := loadGen.NumOfLinesInMultiLineLog
 	expectedNumberOfBytes := (int(loadGen.LineLength) * loadGen.NumOfLinesInMultiLineLog) + (loadGen.NumOfLinesInMultiLineLog - 1)
+	fmt.Print(expectedNumberOfBytes)
 
 	outputLine := loadGen.buildMultiLine()
 	if len(outputLine) != expectedNumberOfBytes {

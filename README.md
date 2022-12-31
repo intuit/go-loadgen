@@ -98,7 +98,8 @@ To start a log replay test with a specified input file.
     --duration 5
 
 You can also specify the number of times a file should be replayed using the `--replay-count` flag.  
-
+### Disable timestamp injection for replay tests
+You can disable timestamp injection if your replay reference log files already have timestamp using `--disable-timestamp` boolean flag
 > If you use the `--replay-count` flag, then the flag `--duration` cannot be used, since the
 > former flag becomes the test termination criteria, and you cannot simultaneously use two different termination criteria for the test.
 

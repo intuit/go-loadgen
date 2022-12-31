@@ -8,3 +8,4 @@ test-logger
 1
 loadgen
 test-data/
+go-loadgen

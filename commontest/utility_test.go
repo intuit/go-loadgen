@@ -1,9 +1,11 @@
-package utility
+package commontest
 
 import (
 	"github.com/google/uuid"
 	"github.com/intuit/go-loadgen/constants"
 	"github.com/intuit/go-loadgen/eventbreaker"
+	loadgen "github.com/intuit/go-loadgen/loadgenerator"
+	"github.com/intuit/go-loadgen/util"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
@@ -12,6 +14,7 @@ import (
 )
 
 func TestGetFormatter(t *testing.T) {
+
 	outputFile := constants.TestOutputFileRootPath + "/" + uuid.New().String()[:5] + ".log"
 	file, err := os.OpenFile(outputFile, os.O_CREATE|os.O_RDWR, 0666)
 	defer os.Remove(outputFile)
@@ -20,7 +23,12 @@ func TestGetFormatter(t *testing.T) {
 	}
 	log := logrus.New()
 	log.Out = file
-	log.SetFormatter(GetFormatter(false))
+	props := loadgen.SetupLogProps(false, &loadgen.LoadGenProperties{
+		DisableTimestamp: false,
+		Tags:             "",
+	})
+
+	log.SetFormatter(utility.GetFormatter(props))
 	testString := "This is a test!"
 	log.Info(testString)
 	bytes, err := ioutil.ReadFile(file.Name())
