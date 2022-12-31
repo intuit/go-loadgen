@@ -154,7 +154,7 @@ func Run(props *loadgen.LoadGenProperties) {
 	rootCmd.PersistentFlags().StringVarP(&props.FilePath, output, "o", "", "file path of output log file ex: /var/tmp/test.log")
 	rootCmd.PersistentFlags().BoolVarP(&props.Rotate, enableRotate, "r", false, "by default log rotation is off, use this flag to turn it on. Example --enable-log-rotation will turn log rotation on")
 	rootCmd.PersistentFlags().Int64VarP(&props.RotateSizeMB, logRotationMaxSizeMegabytes, "", constants.DefaultMaxFileSize, "Rotate after N MegaBytes. example 100. ")
-	rootCmd.PersistentFlags().StringVar(&props.Tags, tags, "t", "Custom hardcoded tags in the form of K=V")
+	rootCmd.PersistentFlags().StringVar(&props.Tags, tags, "", "Custom hardcoded tags in the form of K=V")
 	rootCmd.PersistentFlags().StringVar(&props.ResultLog, resultLog, "", "Path of the results log where metrics such as total_lines_generated will be log.")
 	rootCmd.PersistentFlags().StringVar(&props.CustomTimestampFormat, customTimestampFormat, "", "Optional custom timestamp format.The default format is 2006-01-02T15:04:05.000-07:00")
 
