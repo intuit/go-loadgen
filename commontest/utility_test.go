@@ -23,7 +23,7 @@ func TestGetFormatter(t *testing.T) {
 	}
 	log := logrus.New()
 	log.Out = file
-	props := loadgen.SetupLogProps(false, &loadgen.LoadGenProperties{
+	props := loadgen.SetupLogProps(false, true, &loadgen.LoadGenProperties{
 		DisableTimestamp: false,
 		Tags:             "",
 	})

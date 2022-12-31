@@ -69,7 +69,7 @@ func (props *LoadGenProperties) fetchLogHandlers(isLineEndsWithNewLine bool) []*
 	for n := 0; n < int(props.FileCount); n++ {
 		logHandlers[n] = logrus.New()
 		if props.LogFormat == nil {
-			logProps := SetupLogProps(false, props)
+			logProps := SetupLogProps(false, true, props)
 			logHandlers[n].SetFormatter(utility.GetFormatter(logProps))
 		} else {
 			logHandlers[n].SetFormatter(props.LogFormat)
@@ -169,7 +169,7 @@ func (props *LoadGenProperties) buildMultiLine() string {
 	return string(multiLineString)
 }
 
-func SetupLogProps(isMetricsLogs bool, props *LoadGenProperties) *utility.LogProperties {
+func SetupLogProps(isMetricsLogs bool, insertNewline bool, props *LoadGenProperties) *utility.LogProperties {
 	logProps := new(utility.LogProperties)
 
 	if isMetricsLogs {
@@ -181,7 +181,11 @@ func SetupLogProps(isMetricsLogs bool, props *LoadGenProperties) *utility.LogPro
 		logProps.DisableTimestamp = props.DisableTimestamp
 		logProps.CustomTimestampFormat = props.CustomTimestampFormat
 		logProps.Tags = props.Tags
-		logProps.IsLineEndsWithNewLine = true
+		if insertNewline {
+			logProps.IsLineEndsWithNewLine = true
+		} else {
+			logProps.IsLineEndsWithNewLine = false
+		}
 	}
 
 	return logProps

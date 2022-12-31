@@ -85,7 +85,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 	goGenMetricsRegistry.Register("total-events-processed", counter)
 	metricsLogger := logrus.New()
 	metricsLogger.Out = os.Stdout
-	logProps := SetupLogProps(false, props)
+	logProps := SetupLogProps(false, true, props)
 	metricsLogger.Formatter = utility.GetFormatter(logProps)
 
 	go metrics.Log(goGenMetricsRegistry, 1*time.Second, metricsLogger)
@@ -135,7 +135,7 @@ func GenerateLoadFromInputFile(promRegistry *prometheus.Registry, props *LoadGen
 			prev := time.Now()
 			if !props.Rotate {
 				log.Out = fileArray[fileCountIndex]
-				logProps := SetupLogProps(false, props)
+				logProps := SetupLogProps(false, false, props)
 				log.SetFormatter(utility.GetFormatter(logProps))
 			} else {
 				log = logHandlers[fileCountIndex]
@@ -259,7 +259,7 @@ func GenerateAlphaNumeric(promRegistry *prometheus.Registry, props *LoadGenPrope
 		}
 		if !props.Rotate {
 			log.Out = fileArray[fileCountIndex]
-			logProps := SetupLogProps(false, props)
+			logProps := SetupLogProps(false, true, props)
 			log.SetFormatter(utility.GetFormatter(logProps))
 		} else {
 			log = logHandlers[fileCountIndex]
