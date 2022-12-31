@@ -176,6 +176,16 @@ Log rotation default settings
 | File Compression |  Disabled| |
 
 
+## Common options
+
+- Customizing log timestamp 
+Use `2006-01-02T15:04:05.000-07:00` with the --custom-timestamp-format flag to provide custom timestamp format. 
+Example:
+
+```
+./loadgen ... --custom-timestamp-format 2006/01/02T15-04-05 ...
+```
+The above custom timestamp will override the default timestamp in both alphanumeric random logs and replay logs depending on which mode the test is executed.
 
 ## Prometheus Metrics
 
