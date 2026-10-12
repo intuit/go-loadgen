@@ -1,15 +1,14 @@
-# Now copy it into our base image.
-FROM golang:1.12
+# Build a static binary with a supported Go release...
+FROM golang:1.26 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /loadgen .
+
+# ...and copy it into a minimal base image.
+FROM gcr.io/distroless/static-debian13:nonroot
 LABEL maintainer="chaitanya_bhatt@intuit.com"
-RUN mkdir /app
-# copy everything in the root directory into our /app directory
-ADD . /app
-# execute further commands inside our /app directory
-WORKDIR /app
-
-RUN tar -xvzf test-data/qbo-1.log.tar --directory test-data/.
-
-RUN go build -o loadgen .
-
-CMD ["/app/loader"]
-
+LABEL org.opencontainers.image.source="https://github.com/intuit/go-loadgen"
+COPY --from=build /loadgen /loadgen
+ENTRYPOINT ["/loadgen"]
