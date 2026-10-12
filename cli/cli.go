@@ -9,6 +9,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"os"
+	"runtime/debug"
+	"strings"
 	"sync"
 )
 
@@ -16,6 +18,7 @@ const (
 	lineCount                   = "line-count"
 	lineLength                  = "line-length"
 	fileCount                   = "file-count"
+	threads                     = "threads"
 	duration                    = "duration"
 	enableRotate                = "enable-log-rotation"
 	linesPerSecond              = "lines-per-second"
@@ -34,15 +37,30 @@ const (
 	resultLog                   = "result-log"
 )
 
-func InputValidation(props *loadgen.LoadGenProperties) {
-
-	if !props.Rotate {
+// InputValidation validates the flags shared by all commands before a test starts.
+func InputValidation(props *loadgen.LoadGenProperties) error {
+	if props.FileCount < 1 || props.FileCount > constants.MaxFileCount {
+		return fmt.Errorf("--%s must be between 1 and %d", fileCount, constants.MaxFileCount)
+	}
+	if props.Threads < 1 {
+		return fmt.Errorf("--%s must be at least 1", threads)
+	}
+	if props.Lps < 1 {
+		return fmt.Errorf("--%s must be at least 1", linesPerSecond)
+	}
+	if !props.Rotate && !strings.EqualFold(props.FilePath, "stdout") {
 		fmt.Println("Warning. File rotation is disabled. You may run out of disk space if the file grows too large!")
 	}
-	if props.FileCount > constants.MaxFileCount {
-		fmt.Printf("Too many files in --file-count parameter. This program can only support upto %d files\n", constants.MaxFileCount)
-		os.Exit(1)
+	return nil
+}
+
+// version returns the module version go-loadgen was installed at, e.g. with
+// go install github.com/intuit/go-loadgen@latest.
+func version() string {
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" {
+		return info.Main.Version
 	}
+	return "(devel)"
 }
 
 var cfgFile string
@@ -53,7 +71,8 @@ func printInput(props *loadgen.LoadGenProperties) {
 	fmt.Printf(lineLength+" = %d\n", props.LineLength)
 	fmt.Printf(duration+" = %d\n", props.Duration)
 	fmt.Printf(linesPerSecond+" = %d\n", props.Lps)
-	fmt.Println(output + " =  %s" + props.FilePath)
+	fmt.Printf(threads+" = %d\n", props.Threads)
+	fmt.Printf(output+" = %s\n", props.FilePath)
 	fmt.Printf(multiLinePercent+" = %d\n", props.MultiLinePercent)
 	fmt.Printf(disableTimestamp+" = %t\n", props.DisableTimestamp)
 	fmt.Printf(customTimestampFormat+" = %s\n", props.CustomTimestampFormat)
@@ -83,8 +102,15 @@ func Run(props *loadgen.LoadGenProperties) {
 	promRegistry := prometheus.NewRegistry()
 
 	rootCmd := &cobra.Command{
-		Use:   "loadgen [COMMANDS]",
-		Short: "loadgen is a tool which generates test-data (synthetic/replay) at a controlled rate to test logging infrastructure.",
+		Use:     "loadgen [COMMANDS]",
+		Short:   "loadgen is a tool which generates test-data (synthetic/replay) at a controlled rate to test logging infrastructure.",
+		Version: version(),
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if err := cmd.ValidateRequiredFlags(); err != nil {
+				return err
+			}
+			return InputValidation(props)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			checkInsufficientArgs(cmd, args)
 			printInput(props)
@@ -146,7 +172,9 @@ func Run(props *loadgen.LoadGenProperties) {
 	//Defining persistent flags for root command
 	rootCmd.PersistentFlags().Int64VarP(&props.Duration, duration, "d", constants.DefaultDurationInSeconds, "Duration of the job in seconds")
 	rootCmd.PersistentFlags().Int64VarP(&props.Lps, linesPerSecond, "s", constants.DefaultLinesPerSecond, "target lines/second")
-	rootCmd.PersistentFlags().Int64VarP(&props.FileCount, fileCount, "", constants.DefaultFileCount, "target requests/sec. Note: log rotation does not work in multi file scenario.")
+	rootCmd.PersistentFlags().Int64VarP(&props.FileCount, fileCount, "", constants.DefaultFileCount, fmt.Sprintf("number of output files (up to %d). Lines are spread round-robin over the files.", constants.MaxFileCount))
+	rootCmd.PersistentFlags().IntVarP(&props.Threads, threads, "t", constants.DefaultThreads, "number of threads generating lines concurrently. --lines-per-second is the combined rate of all threads. "+
+		"With more than one thread, lines from different threads are interleaved in the output. Combine with --file-count for higher throughput.")
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, config, "", "cfg", "-config /path/to/source/jsonfile")
 	rootCmd.PersistentFlags().BoolVarP(&enableConfigVar, enableConfig, "", false, "use config file for configuration (default false)")
 	rootCmd.PersistentFlags().StringVarP(&metricsServerPortStr, metricsServerPort, "p", constants.DefaultMetricsServerPort, "prometheus metrics server port. default is port 8080. ")
@@ -180,10 +208,7 @@ func Run(props *loadgen.LoadGenProperties) {
 
 	rootCmd.AddCommand(randomStringsCmd, replayFileCmd)
 
-	err := rootCmd.Execute()
-	InputValidation(props)
-	if err != nil {
-		error.Error(err)
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
