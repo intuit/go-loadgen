@@ -1,0 +1,6 @@
+.git
+.idea
+dist
+loadgen
+go-loadgen
+*.log

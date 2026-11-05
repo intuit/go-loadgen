@@ -2,7 +2,10 @@ package loadgen
 
 import (
 	"fmt"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -58,5 +61,58 @@ func TestFileRefs(t *testing.T) {
 	}
 	if len(files) != limit {
 		t.Errorf("length of file array returned by fileRef() has a mismatch, contains %d, expected %d", len(files), limit)
+	}
+}
+
+func TestNumberedPath(t *testing.T) {
+	for _, tc := range []struct{ path, suffix, want string }{
+		{"test.log", "1", "test1.log"},
+		{"/var/log/app.log", "-2", "/var/log/app-2.log"},
+		{"./out.log", "0", "./out0.log"},
+		{"/tmp/my.dir/test.log", "3", "/tmp/my.dir/test3.log"},
+		{"/tmp/my.dir/test", "-1", "/tmp/my.dir/test-1"},
+		{"test.tar.gz", "4", "test4.tar.gz"},
+	} {
+		if got := numberedPath(tc.path, tc.suffix); got != tc.want {
+			t.Errorf("numberedPath(%q, %q) = %q, want %q", tc.path, tc.suffix, got, tc.want)
+		}
+	}
+}
+
+func TestOutputs(t *testing.T) {
+	stdout := &LoadGenProperties{FilePath: "stdout", FileCount: 3}
+	if outputs, err := stdout.outputs(); err != nil || len(outputs) != 1 || outputs[0] != os.Stdout {
+		t.Errorf("stdout with --file-count 3: outputs = %v, err = %v; want only stdout", outputs, err)
+	}
+
+	// A "." in a directory name used to be replaced instead of the one in the file name.
+	dir := filepath.Join(t.TempDir(), "my.dir")
+	if err := os.Mkdir(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	files := &LoadGenProperties{FilePath: filepath.Join(dir, "test.log"), FileCount: 2}
+	outputs, err := files.outputs()
+	if err != nil || len(outputs) != 2 {
+		t.Fatalf("outputs = %v, err = %v; want 2 files", outputs, err)
+	}
+	for i, output := range outputs {
+		if want := filepath.Join(dir, "test"+strconv.Itoa(i)+".log"); output.(*os.File).Name() != want {
+			t.Errorf("output %d = %s, want %s", i, output.(*os.File).Name(), want)
+		}
+	}
+
+	// Rotated files without an extension used to all share the same file.
+	rotated := &LoadGenProperties{FilePath: filepath.Join(dir, "rotated"), FileCount: 2, Rotate: true}
+	outputs, err = rotated.outputs()
+	if err != nil || len(outputs) != 2 {
+		t.Fatalf("outputs = %v, err = %v; want 2 rotated files", outputs, err)
+	}
+	if a, b := outputs[0].(*lumberjack.Logger).Filename, outputs[1].(*lumberjack.Logger).Filename; a == b {
+		t.Errorf("both rotated outputs write to %s", a)
+	}
+
+	missingDir := &LoadGenProperties{FilePath: filepath.Join(dir, "missing", "test.log"), FileCount: 1}
+	if _, err := missingDir.outputs(); err == nil {
+		t.Error("expected an error for an output file in a directory that does not exist")
 	}
 }

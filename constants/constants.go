@@ -12,6 +12,9 @@ const MaxFileCount = 30
 // DefaultFileCount is the default number of files the generator creates.
 const DefaultFileCount = 1
 
+// DefaultThreads is the default number of concurrent generator threads.
+const DefaultThreads = 1
+
 // DefaultMetricsServerPortal is the default port on which the prometheus metrics server starts
 const DefaultMetricsServerPort = "8080"
 

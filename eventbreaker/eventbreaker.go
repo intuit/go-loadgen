@@ -7,7 +7,7 @@ type KnownEventBreakers struct {
 }
 
 /*
-	NewEventBreakers Initializes a known set of log event breakers. (Note: Usually dates and ip addresses are commonly used as event breakers.)
+NewEventBreakers Initializes a known set of log event breakers. (Note: Usually dates and ip addresses are commonly used as event breakers.)
 */
 func NewEventBreakers() *KnownEventBreakers {
 	eventBreakers := new(KnownEventBreakers)
@@ -30,13 +30,18 @@ func NewEventBreakers() *KnownEventBreakers {
 }
 
 func (eventBreakers KnownEventBreakers) HasKnownEventBreakerString(line string) bool {
-	for _, rex := range eventBreakers.regexExp {
-		if rex.MatchString(line) {
+	for i := range eventBreakers.regexExp {
+		if eventBreakers.regexExp[i].MatchString(line) {
 			return true
 		}
 	}
 	return false
 }
 func (eventBreakers KnownEventBreakers) HasKnownEventBreakerBytes(line []byte) bool {
-	return eventBreakers.HasKnownEventBreakerString(string(line))
+	for i := range eventBreakers.regexExp {
+		if eventBreakers.regexExp[i].Match(line) {
+			return true
+		}
+	}
+	return false
 }

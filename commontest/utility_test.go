@@ -7,7 +7,6 @@ import (
 	loadgen "github.com/intuit/go-loadgen/loadgenerator"
 	"github.com/intuit/go-loadgen/util"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -31,7 +30,7 @@ func TestGetFormatter(t *testing.T) {
 	log.SetFormatter(utility.GetFormatter(props))
 	testString := "This is a test!"
 	log.Info(testString)
-	bytes, err := ioutil.ReadFile(file.Name())
+	bytes, err := os.ReadFile(file.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
